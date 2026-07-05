@@ -139,7 +139,7 @@ fig = plt.figure(figsize=(13, 9))
 fig.suptitle("Simulación ACC — Modo Velocidad Fija — Lazo de Control PID", fontsize=13, fontweight="bold")
 
 gs = fig.add_gridspec(4, 2, width_ratios=[3, 1], hspace=0.5, wspace=0.35,
-                       left=0.08, right=0.95, top=0.92, bottom=0.06)
+                       left=0.08, right=0.93, top=0.92, bottom=0.06)
 
 ax_v = fig.add_subplot(gs[0, 0])
 ax_e = fig.add_subplot(gs[1, 0], sharex=ax_v)
@@ -186,50 +186,48 @@ for ax in (ax_v, ax_e, ax_u):
 # ==============================================================================
 # 5. PANEL DE CONTROLES (columna derecha)
 # ==============================================================================
-ax_kp = fig.add_subplot(gs[0, 1])
-ax_ki = fig.add_subplot(gs[0, 1])
-ax_slider_area = fig.add_axes([0.80, 0.60, 0.16, 0.30])
+ax_slider_area = fig.add_axes([0.78, 0.58, 0.15, 0.32])
 ax_slider_area.axis("off")
 
 # Sliders de ganancias PID
-s_kp_ax = fig.add_axes([0.80, 0.86, 0.16, 0.025])
-s_ki_ax = fig.add_axes([0.80, 0.82, 0.16, 0.025])
-s_kd_ax = fig.add_axes([0.80, 0.78, 0.16, 0.025])
+s_kp_ax = fig.add_axes([0.78, 0.86, 0.15, 0.025])
+s_ki_ax = fig.add_axes([0.78, 0.82, 0.15, 0.025])
+s_kd_ax = fig.add_axes([0.78, 0.78, 0.15, 0.025])
 s_kp = Slider(s_kp_ax, "Kp", 0.0, 3.0, valinit=0.8, valstep=0.05, color="#185FA5")
 s_ki = Slider(s_ki_ax, "Ki", 0.0, 1.0, valinit=0.15, valstep=0.01, color="#3B6D11")
 s_kd = Slider(s_kd_ax, "Kd", 0.0, 2.0, valinit=0.3, valstep=0.05, color="#854F0B")
 
-fig.text(0.80, 0.895, "Ganancias del controlador PID", fontsize=9, fontweight="bold")
+fig.text(0.78, 0.895, "Ganancias del controlador PID", fontsize=9, fontweight="bold")
 
 # Sliders de perturbación
-s_amp_ax = fig.add_axes([0.80, 0.68, 0.16, 0.025])
-s_dur_ax = fig.add_axes([0.80, 0.64, 0.16, 0.025])
+s_amp_ax = fig.add_axes([0.78, 0.68, 0.15, 0.025])
+s_dur_ax = fig.add_axes([0.78, 0.64, 0.15, 0.025])
 s_amp = Slider(s_amp_ax, "Amplitud", -40, 40, valinit=25, valstep=1, color="#C0392B")
 s_dur = Slider(s_dur_ax, "Duración [s]", 1, 30, valinit=5, valstep=1, color="#C0392B")
 
-fig.text(0.80, 0.715, "Perturbación (carga del recorrido)", fontsize=9, fontweight="bold")
+fig.text(0.78, 0.715, "Perturbación (carga del recorrido)", fontsize=9, fontweight="bold")
 
 # Slider de velocidad inicial (condición inicial de la planta)
-s_v0_ax = fig.add_axes([0.80, 0.595, 0.16, 0.025])
+s_v0_ax = fig.add_axes([0.78, 0.595, 0.15, 0.025])
 s_v0 = Slider(s_v0_ax, "V. inicial [km/h]", 0, 150, valinit=0, valstep=5, color="#5F5E5A")
-fig.text(0.80, 0.625, "Condición inicial", fontsize=9, fontweight="bold")
+fig.text(0.78, 0.625, "Condición inicial", fontsize=9, fontweight="bold")
 
 # Slider de velocidad de reproducción
-s_speed_ax = fig.add_axes([0.80, 0.52, 0.16, 0.025])
+s_speed_ax = fig.add_axes([0.78, 0.52, 0.15, 0.025])
 s_speed = Slider(s_speed_ax, "Pasos/frame", 1, 10, valinit=2, valstep=1, color="#5F5E5A")
-fig.text(0.80, 0.555, "Velocidad de simulación", fontsize=9, fontweight="bold")
+fig.text(0.78, 0.555, "Velocidad de simulación", fontsize=9, fontweight="bold")
 
 # Botones
-btn_pert_ax = fig.add_axes([0.80, 0.43, 0.16, 0.045])
-btn_pausa_ax = fig.add_axes([0.80, 0.37, 0.16, 0.045])
-btn_reset_ax = fig.add_axes([0.80, 0.31, 0.16, 0.045])
+btn_pert_ax = fig.add_axes([0.78, 0.43, 0.15, 0.045])
+btn_pausa_ax = fig.add_axes([0.78, 0.37, 0.15, 0.045])
+btn_reset_ax = fig.add_axes([0.78, 0.31, 0.15, 0.045])
 
 btn_pert = Button(btn_pert_ax, "Inyectar perturbación", color="#FADBD8", hovercolor="#F1948A")
 btn_pausa = Button(btn_pausa_ax, "▶ Iniciar / Pausar", color="#D5F5E3", hovercolor="#7DCEA0")
 btn_reset = Button(btn_reset_ax, "Reiniciar simulación", color="#EAECEE", hovercolor="#BFC9CA")
 
 # Texto de estado (tiempo actual, estado de perturbación)
-txt_estado = fig.text(0.80, 0.24, "", fontsize=9, va="top", family="monospace")
+txt_estado = fig.text(0.78, 0.24, "", fontsize=9, va="top", family="monospace")
 
 
 # ==============================================================================
