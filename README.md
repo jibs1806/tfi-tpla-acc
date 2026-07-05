@@ -51,11 +51,12 @@ Al ejecutar la simulación, se abrirá una ventana gráfica interactiva con cuat
 ### 2. Panel de Sintonización y Control (Lado Derecho)
 * **Ganancias del PID (Kp, Ki, Kd):** Deslizadores para cambiar los parámetros del controlador digital en caliente para observar cambios en estabilidad, sobrepico y tiempo de establecimiento.
 * **Perturbación (Amplitud y Duración):** Ajusta las características de la perturbación que se inyectará.
+* **Condición Inicial (Velocidad Inicial):** Deslizador para ajustar la velocidad inicial ($V_0$) con la que arranca el vehículo al reiniciar la simulación (configurable de $0$ a $150\text{ km/h}$).
 * **Velocidad de Simulación:** Permite acelerar el paso del tiempo en el gráfico acelerando el procesamiento de ciclos de escaneo por cuadro visual.
 * **Botones:**
   * `▶ Iniciar / Pausar`: Arranca o detiene temporalmente la simulación.
   * `Inyectar perturbación`: Inyecta instantáneamente el escalón de perturbación configurado.
-  * `Reiniciar simulación`: Limpia el historial de gráficos y resetea las variables al estado inicial ($0\text{ km/h}$).
+  * `Reiniciar simulación`: Limpia el historial de gráficos y resetea las variables a la velocidad inicial configurada.
 
 ---
 
