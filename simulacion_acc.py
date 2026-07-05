@@ -245,7 +245,14 @@ def on_click_pausa(event):
 
 
 def on_click_reset(event):
-    estado.reset(v0_kmh=s_v0.val)
+    v0 = s_v0.val
+    estado.reset(v0_kmh=v0)
+    # Precarga del acumulador integral (bumpless initialization):
+    # sin esto, el controlador arranca "sin saber" cuánto esfuerzo hace
+    # falta para sostener la velocidad inicial, y la velocidad cae antes
+    # de empezar a subir hacia la referencia.
+    if s_ki.val > 0:
+        estado.integral = kmh_to_v(v0) / (K_PLANT * s_ki.val)
     for ln in (line_vref, line_vout, line_e, line_u, line_p):
         ln.set_data([], [])
     fig.canvas.draw_idle()
@@ -254,6 +261,19 @@ def on_click_reset(event):
 btn_pert.on_clicked(on_click_pert)
 btn_pausa.on_clicked(on_click_pausa)
 btn_reset.on_clicked(on_click_reset)
+
+
+def on_change_v0(val):
+    """Si la simulación todavía no avanzó ningún paso (k==0), aplicar
+    la velocidad inicial de inmediato, sin necesidad de tocar 'Reiniciar'.
+    Si ya avanzó, el cambio se aplicará recién al presionar 'Reiniciar'."""
+    if estado.k == 0:
+        estado.theta_o = kmh_to_v(val)
+        if s_ki.val > 0:
+            estado.integral = kmh_to_v(val) / (K_PLANT * s_ki.val)
+
+
+s_v0.on_changed(on_change_v0)
 
 
 # ==============================================================================
