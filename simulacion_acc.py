@@ -65,9 +65,9 @@ class EstadoSimulacion:
     def __init__(self):
         self.reset()
 
-    def reset(self):
+    def reset(self, v0_kmh=0.0):
         self.k = 0                      # índice de paso actual
-        self.theta_o = 0.0              # salida de la planta [V] (arranca en 0 km/h)
+        self.theta_o = kmh_to_v(v0_kmh)  # salida de la planta [V] (velocidad inicial configurable)
         self.integral = 0.0
         self.e_prev = 0.0
         self.pert_activa_desde = -1.0   # instante en que se inyectó la última perturbación
@@ -209,22 +209,27 @@ s_dur = Slider(s_dur_ax, "Duración [s]", 1, 30, valinit=5, valstep=1, color="#C
 
 fig.text(0.80, 0.715, "Perturbación (carga del recorrido)", fontsize=9, fontweight="bold")
 
+# Slider de velocidad inicial (condición inicial de la planta)
+s_v0_ax = fig.add_axes([0.80, 0.595, 0.16, 0.025])
+s_v0 = Slider(s_v0_ax, "V. inicial [km/h]", 0, 150, valinit=0, valstep=5, color="#5F5E5A")
+fig.text(0.80, 0.625, "Condición inicial", fontsize=9, fontweight="bold")
+
 # Slider de velocidad de reproducción
-s_speed_ax = fig.add_axes([0.80, 0.56, 0.16, 0.025])
+s_speed_ax = fig.add_axes([0.80, 0.52, 0.16, 0.025])
 s_speed = Slider(s_speed_ax, "Pasos/frame", 1, 10, valinit=2, valstep=1, color="#5F5E5A")
-fig.text(0.80, 0.595, "Velocidad de simulación", fontsize=9, fontweight="bold")
+fig.text(0.80, 0.555, "Velocidad de simulación", fontsize=9, fontweight="bold")
 
 # Botones
-btn_pert_ax = fig.add_axes([0.80, 0.47, 0.16, 0.045])
-btn_pausa_ax = fig.add_axes([0.80, 0.41, 0.16, 0.045])
-btn_reset_ax = fig.add_axes([0.80, 0.35, 0.16, 0.045])
+btn_pert_ax = fig.add_axes([0.80, 0.43, 0.16, 0.045])
+btn_pausa_ax = fig.add_axes([0.80, 0.37, 0.16, 0.045])
+btn_reset_ax = fig.add_axes([0.80, 0.31, 0.16, 0.045])
 
 btn_pert = Button(btn_pert_ax, "Inyectar perturbación", color="#FADBD8", hovercolor="#F1948A")
 btn_pausa = Button(btn_pausa_ax, "▶ Iniciar / Pausar", color="#D5F5E3", hovercolor="#7DCEA0")
 btn_reset = Button(btn_reset_ax, "Reiniciar simulación", color="#EAECEE", hovercolor="#BFC9CA")
 
 # Texto de estado (tiempo actual, estado de perturbación)
-txt_estado = fig.text(0.80, 0.28, "", fontsize=9, va="top", family="monospace")
+txt_estado = fig.text(0.80, 0.24, "", fontsize=9, va="top", family="monospace")
 
 
 # ==============================================================================
@@ -240,7 +245,7 @@ def on_click_pausa(event):
 
 
 def on_click_reset(event):
-    estado.reset()
+    estado.reset(v0_kmh=s_v0.val)
     for ln in (line_vref, line_vout, line_e, line_u, line_p):
         ln.set_data([], [])
     fig.canvas.draw_idle()
