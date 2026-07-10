@@ -1,38 +1,9 @@
-"""
-================================================================================
- SIMULACIÓN DE SISTEMA DE CONTROL DE CRUCERO ADAPTATIVO (ACC) - MODO FIJO
- UTN FRBA - Teoría de Control K-4011
-================================================================================
-
-Este programa simula el lazo de control de velocidad del ACC en modo fijo,
-mostrando en tiempo real las variables fundamentales del sistema:
-
-    Theta_i (t) -> Referencia de velocidad fijada por el conductor      [V]
-    e(t)        -> Señal de error = Theta_i(t) - f(t)                   [V]
-    Theta_oc(t) -> Salida del controlador PID (señal de control)        [V]
-    Theta_o(t)  -> Salida real de la planta = velocidad del vehículo    [V] (mostrada en km/h)
-    f(t)        -> Señal de realimentación (elemento de medición)       [V]
-    P(t)        -> Perturbación (carga del recorrido: pendiente/viento) [km/h equivalente]
-
-El tablero permite, en tiempo real:
-    - Modificar las ganancias Kp, Ki, Kd del controlador PID
-    - Modificar la amplitud y duración de la perturbación
-    - Inyectar la perturbación en el instante que se desee
-    - Pausar y reanudar la simulación (para analizar cambio y recuperación)
-    - Reiniciar la simulación completa
-
-Requisitos: numpy, matplotlib
-Ejecutar con: python simulacion_acc.py
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.widgets import Slider, Button
 
-# ==============================================================================
 # 1. RELACIÓN DE SOLIDARIDAD: velocidad [km/h] <-> voltaje [V]
 #    100 km/h equivalen a 683 Hz en el encoder equivalen a 2.5V en el LM2907
-# ==============================================================================
 FACTOR_V_KMH = 2.5 / 100.0  # [V / (km/h)]
 
 def kmh_to_v(v_kmh):
@@ -42,9 +13,7 @@ def v_to_kmh(v_volts):
     return v_volts / FACTOR_V_KMH
 
 
-# ==============================================================================
 # 2. PARÁMETROS DE LA PLANTA  G(s) = K / (tau*s + 1)
-# ==============================================================================
 K_PLANT = 1.0     # ganancia estática de la planta
 TAU = 8.0         # constante de tiempo mecánica del vehículo [s]
 DT = 0.1          # paso de integración = ciclo de scan del controlador [s] (10 Hz)
@@ -58,9 +27,9 @@ V_REF_KMH = 100.0             # velocidad de referencia fijada por el conductor
 THETA_I = kmh_to_v(V_REF_KMH)  # referencia en Volts (constante, modo fijo)
 
 
-# ==============================================================================
+
 # 3. ESTADO DE LA SIMULACIÓN
-# ==============================================================================
+
 class EstadoSimulacion:
     def __init__(self):
         self.reset()
@@ -132,30 +101,39 @@ def paso_simulacion(Kp, Ki, Kd, pert_amp_kmh, pert_dur):
     estado.k += 1
 
 
-# ==============================================================================
+
 # 4. INTERFAZ GRÁFICA — TABLERO DE CONTROL
-# ==============================================================================
-fig = plt.figure(figsize=(13, 9))
+
+fig = plt.figure(figsize=(13, 12.5))
 fig.suptitle("Simulación ACC — Modo Velocidad Fija — Lazo de Control PID", fontsize=13, fontweight="bold")
 
-gs = fig.add_gridspec(4, 2, width_ratios=[3, 1], hspace=0.5, wspace=0.35,
-                       left=0.08, right=0.93, top=0.92, bottom=0.06)
+gs = fig.add_gridspec(6, 2, width_ratios=[3, 1], hspace=0.7, wspace=0.35,
+                       left=0.08, right=0.93, top=0.94, bottom=0.04)
 
 ax_v = fig.add_subplot(gs[0, 0])
-ax_e = fig.add_subplot(gs[1, 0], sharex=ax_v)
-ax_u = fig.add_subplot(gs[2, 0], sharex=ax_v)
-ax_p = fig.add_subplot(gs[3, 0], sharex=ax_v)
+ax_i = fig.add_subplot(gs[1, 0], sharex=ax_v)
+ax_e = fig.add_subplot(gs[2, 0], sharex=ax_v)
+ax_u = fig.add_subplot(gs[3, 0], sharex=ax_v)
+ax_f = fig.add_subplot(gs[4, 0], sharex=ax_v)
+ax_p = fig.add_subplot(gs[5, 0], sharex=ax_v)
 
-# --- Subplot 1: velocidad referencia vs real ---
-line_vref, = ax_v.plot([], [], color="#3B6D11", lw=1.8, label=r"$\theta_i(t)$ — referencia")
-line_vout, = ax_v.plot([], [], color="#185FA5", lw=1.8, label=r"$\theta_o(t)$ — velocidad real")
+# --- Grafico 1: SALIDA del sistema---
+line_vref, = ax_v.plot([], [], color="#3B6D11", lw=1.8, label="Valor nominal (referencia)")
+line_vout, = ax_v.plot([], [], color="#185FA5", lw=1.8, label="Valor real (medido)")
 ax_v.set_ylabel("Velocidad [km/h]")
 ax_v.set_ylim(-10, 160)
 ax_v.legend(loc="lower right", fontsize=8)
-ax_v.set_title("Variable controlada: velocidad del vehículo", fontsize=10)
+ax_v.set_title(r"Salida del sistema $\theta_o(t)$: velocidad del vehículo", fontsize=9)
 ax_v.grid(alpha=0.3)
 
-# --- Subplot 2: error ---
+# --- Grafico 2: ENTRADA del sistema en Volts---
+line_theta_i_v, = ax_i.plot([], [], color="#3B6D11", lw=1.8, linestyle="--")
+ax_i.set_ylabel(r"$\theta_i(t)$ [V]")
+ax_i.set_ylim(0, 5)
+ax_i.set_title(r"Entrada del sistema $\theta_i(t)$: referencia fijada por el conductor, en Volts", fontsize=9)
+ax_i.grid(alpha=0.3)
+
+# --- Grafico 2: error ---
 line_e, = ax_e.plot([], [], color="#854F0B", lw=1.4)
 ax_e.axhline(0, color="gray", lw=0.6)
 ax_e.set_ylabel("e(t) [V]")
@@ -163,7 +141,7 @@ ax_e.set_ylim(-1.5, 3.0)
 ax_e.set_title(r"Señal de error  $e(t) = \theta_i(t) - f(t)$", fontsize=10)
 ax_e.grid(alpha=0.3)
 
-# --- Subplot 3: señal de control ---
+# --- Grafico 3: señal de control ---
 line_u, = ax_u.plot([], [], color="#534AB7", lw=1.4)
 ax_u.axhline(0, color="gray", lw=0.6)
 ax_u.set_ylabel(r"$\theta_{oc}(t)$ [V]")
@@ -171,21 +149,29 @@ ax_u.set_ylim(-U_MAX - 0.5, U_MAX + 0.5)
 ax_u.set_title(r"Salida del controlador PID  $\theta_{oc}(t)$ (saturada en actuador)", fontsize=10)
 ax_u.grid(alpha=0.3)
 
-# --- Subplot 4: perturbación ---
+# --- Grafico 4: señal del elemento de medición f(t) ---
+line_f, = ax_f.plot([], [], color="#0F6E56", lw=1.4)
+ax_f.axhline(0, color="gray", lw=0.6)
+ax_f.set_ylabel("f(t) [V]")
+ax_f.set_ylim(-0.5, 5.0)
+ax_f.set_title(r"Señal de realimentación $f(t)$ (salida del elemento de medición: encoder + conversor F/V)", fontsize=10)
+ax_f.grid(alpha=0.3)
+
+# --- Subplot 5: perturbacion ---
 line_p, = ax_p.plot([], [], color="#C0392B", lw=1.4)
 ax_p.fill_between([], [], color="#C0392B", alpha=0.15)
 ax_p.set_ylabel("P(t) [km/h eq.]")
 ax_p.set_xlabel("Tiempo [s]")
 ax_p.set_ylim(-45, 45)
-ax_p.set_title("Perturbación — carga del recorrido (pendiente / viento / asfalto)", fontsize=10)
+ax_p.set_title("Perturbación — carga del recorrido (pendiente / viento)", fontsize=10)
 ax_p.grid(alpha=0.3)
 
-for ax in (ax_v, ax_e, ax_u):
+for ax in (ax_v, ax_i, ax_e, ax_u, ax_f):
     plt.setp(ax.get_xticklabels(), visible=False)
 
-# ==============================================================================
+
 # 5. PANEL DE CONTROLES (columna derecha)
-# ==============================================================================
+
 ax_slider_area = fig.add_axes([0.78, 0.58, 0.15, 0.32])
 ax_slider_area.axis("off")
 
@@ -230,9 +216,9 @@ btn_reset = Button(btn_reset_ax, "Reiniciar simulación", color="#EAECEE", hover
 txt_estado = fig.text(0.78, 0.24, "", fontsize=9, va="top", family="monospace")
 
 
-# ==============================================================================
+
 # 6. CALLBACKS DE LOS BOTONES
-# ==============================================================================
+
 def on_click_pert(event):
     """Inyecta la perturbación en el instante actual de la simulación."""
     estado.pert_activa_desde = estado.k * DT
@@ -245,13 +231,10 @@ def on_click_pausa(event):
 def on_click_reset(event):
     v0 = s_v0.val
     estado.reset(v0_kmh=v0)
-    # Precarga del acumulador integral (bumpless initialization):
-    # sin esto, el controlador arranca "sin saber" cuánto esfuerzo hace
-    # falta para sostener la velocidad inicial, y la velocidad cae antes
-    # de empezar a subir hacia la referencia.
+
     if s_ki.val > 0:
         estado.integral = kmh_to_v(v0) / (K_PLANT * s_ki.val)
-    for ln in (line_vref, line_vout, line_e, line_u, line_p):
+    for ln in (line_vref, line_vout, line_theta_i_v, line_e, line_u, line_f, line_p):
         ln.set_data([], [])
     fig.canvas.draw_idle()
 
@@ -262,9 +245,6 @@ btn_reset.on_clicked(on_click_reset)
 
 
 def on_change_v0(val):
-    """Si la simulación todavía no avanzó ningún paso (k==0), aplicar
-    la velocidad inicial de inmediato, sin necesidad de tocar 'Reiniciar'.
-    Si ya avanzó, el cambio se aplicará recién al presionar 'Reiniciar'."""
     if estado.k == 0:
         estado.theta_o = kmh_to_v(val)
         if s_ki.val > 0:
@@ -274,9 +254,8 @@ def on_change_v0(val):
 s_v0.on_changed(on_change_v0)
 
 
-# ==============================================================================
 # 7. LOOP DE ANIMACIÓN
-# ==============================================================================
+
 def actualizar(frame):
     if estado.running:
         pasos = int(s_speed.val)
@@ -288,14 +267,16 @@ def actualizar(frame):
         t_actual = estado.t[:k]
         line_vref.set_data(t_actual, v_to_kmh(estado.theta_i_arr[:k]))
         line_vout.set_data(t_actual, estado.theta_o_kmh_arr[:k])
+        line_theta_i_v.set_data(t_actual, estado.theta_i_arr[:k])
         line_e.set_data(t_actual, estado.e_arr[:k])
         line_u.set_data(t_actual, estado.theta_oc_arr[:k])
+        line_f.set_data(t_actual, estado.f_arr[:k])
         line_p.set_data(t_actual, estado.P_arr[:k])
 
-        # ventana deslizante de 60s para simular "tiempo real"
+        
         t_now = estado.t[k - 1]
         t_ini = max(0, t_now - 60)
-        for ax in (ax_v, ax_e, ax_u, ax_p):
+        for ax in (ax_v, ax_i, ax_e, ax_u, ax_f, ax_p):
             ax.set_xlim(t_ini, max(t_ini + 60, 10))
 
         pert_on = estado.pert_activa_desde >= 0 and estado.pert_activa_desde <= t_now < estado.pert_activa_desde + s_dur.val
@@ -304,15 +285,16 @@ def actualizar(frame):
             f"v real = {estado.theta_o_kmh_arr[k-1]:6.1f} km/h\n"
             f"e(t)   = {estado.e_arr[k-1]:6.3f} V\n"
             f"Toc(t) = {estado.theta_oc_arr[k-1]:6.3f} V\n"
+            f"f(t)   = {estado.f_arr[k-1]:6.3f} V\n"
             f"Perturbación: {'ACTIVA' if pert_on else 'inactiva'}\n"
             f"Estado sim.: {'corriendo' if estado.running else 'pausada'}"
         )
         txt_estado.set_text(estado_txt)
 
-    return line_vref, line_vout, line_e, line_u, line_p
+    return line_vref, line_vout, line_theta_i_v, line_e, line_u, line_f, line_p
 
 
-ani = None  # se crea al final para mantener referencia viva
+ani = None
 
 def iniciar_animacion():
     global ani

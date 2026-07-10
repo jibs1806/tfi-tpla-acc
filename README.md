@@ -38,15 +38,17 @@ Sigue estos pasos en tu terminal para clonar, preparar y ejecutar el entorno:
 
 ---
 
-## 📊 Descripción del Tablero Interactiva
+## 📊 Descripción del Tablero Interactivo
 
-Al ejecutar la simulación, se abrirá una ventana gráfica interactiva con cuatro curvas y un panel de control a la derecha:
+Al ejecutar la simulación, se abrirá una ventana gráfica interactiva con **seis gráficos (curvas)** a la izquierda y un panel de control a la derecha:
 
 ### 1. Variables del Lazo de Control (Gráficos)
-* **Velocidad del Vehículo:** Grafica la referencia deseada fijada por el conductor ($\theta_i(t) = 100\text{ km/h}$ en verde) versus la velocidad real medida del auto ($\theta_o(t)$ en azul).
-* **Señal de Error $e(t)$:** Muestra la señal de error en voltios generada por la diferencia entre la referencia y la realimentación: $e(t) = \theta_i(t) - f(t)$.
-* **Señal de Control $\theta_{oc}(t)$:** Es la salida directa del controlador PID (tensión de control) inyectada al actuador del acelerador. Está físicamente saturada en $\pm 5\text{ V}$.
-* **Perturbación $P(t)$:** Carga de oposición equivalente en km/h que simula el ingreso a una pendiente o resistencia del viento.
+* **Velocidad del Vehículo (Salida del sistema):** Grafica la velocidad nominal de referencia fijada por el conductor ($V_{ref} = 100\text{ km/h}$ en verde) versus la velocidad real medida del auto ($V_{real}$ en azul) en $\text{km/h}$.
+* **Referencia en Voltaje $\theta_i(t)$:** Muestra la señal de entrada al lazo (referencia de velocidad nominal expresada en tensión: $2.5\text{ V}$ en línea verde discontinua).
+* **Señal de Error $e(t)$:** Grafica el error en voltios generado por la diferencia entre la referencia y la realimentación: $e(t) = \theta_i(t) - f(t)$ (marrón).
+* **Señal de Control $\theta_{oc}(t)$:** Es la salida del controlador PID (tensión de control) inyectada al actuador del acelerador, físicamente saturada en $\pm 5\text{ V}$ (violeta).
+* **Señal de Realimentación $f(t)$:** Salida en voltios de la etapa de medición (sensor/encoder + convertidor de frecuencia a tensión LM2907) (verde oscuro).
+* **Perturbación $P(t)$:** Carga de oposición equivalente en $\text{km/h}$ que simula el ingreso a una pendiente o la resistencia del viento (rojo).
 
 ### 2. Panel de Sintonización y Control (Lado Derecho)
 * **Ganancias del PID (Kp, Ki, Kd):** Deslizadores para cambiar los parámetros del controlador digital en caliente para observar cambios en estabilidad, sobrepico y tiempo de establecimiento.
